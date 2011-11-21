@@ -5,7 +5,7 @@ local dbtable={}
 --hack to get lua to call a function on shutdown
 local shutdownproxy = newproxy(true) -- create proxy object with new metatable
 assert(type(shutdownproxy) == 'userdata')
-getmetatable(shutdownproxy).__gc = function() syncIfChanged() end 
+getmetatable(shutdownproxy).__gc = function() syncIfChanged() end
 --global vars
 
 function serializeInit(o,f,n,t)
