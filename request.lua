@@ -20,7 +20,7 @@ local function parseUrl(url)
 
 
 	if query then
-		for k,v in query:gmatch("(%a+)=([^&]+)") do
+		for k,v in query:gmatch("([%a_]+)=([^&]+)") do
 			params[k]=decode.unescape(v:gsub("%+"," "))
 		end
 	end
@@ -101,7 +101,7 @@ function Request:getPost()
 	if not params and self.method == "POST" and headers.CONTENT_LENGTH > 0 and headers.CONTENT_LENGTH < 1048576 and headers.CONTENT_TYPE =="application/x-www-form-urlencoded"  then
 		local query=self:receiveAll()
 		params={}
-		for k,v in query:gmatch("(%a+)=([%a%d%%%+_%-%.%*]+)") do
+		for k,v in query:gmatch("([%a_]+)=([%a%d%%%+_%-%.%*]+)") do
 			params[k]=decode.unescape(v:gsub("%+"," "))
 		end
 		self.post=params
