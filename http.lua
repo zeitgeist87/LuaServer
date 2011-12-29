@@ -91,16 +91,16 @@ function receiveRequest(client)
 					end
 					--free buffer for gc
 					s=nil
-					
-					
+
+
 					local request=Request:create(client,method,url,version,headers,msg)
 					if not request then
-						return					
+						return
 					end
-					
+
 					local response=Response:create(request)
 					request.response=response
-					
+
 					return request, response
 				else
 					--unsupported method bad request
@@ -113,7 +113,7 @@ function receiveRequest(client)
 			coroutine.yield("wantread")
 		elseif status == "wantwrite" then
 			coroutine.yield("wantwrite")
-		end	
+		end
 	end
 	--request too big
 	return nil

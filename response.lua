@@ -5,9 +5,9 @@ function Response:create(request)
 	local new_inst = {request=request,status=200,statusmsg="OK",headers={TRANSFER_ENCODING="chunked"},buffer={},len=0,
 			headerssent=false,headerssending=false,headerslen=0,headersindex=1,firstchunk=true}
 	if request.headers.CONNECTION=="keep-alive" then
-		new_inst.headers.CONNECTION="keep-alive"					
+		new_inst.headers.CONNECTION="keep-alive"
 	end
-	
+
 	if request.version~="1.1" then
 		new_inst.headers.TRANSFER_ENCODING=nil
 	end
@@ -62,9 +62,9 @@ function Response:flush(lastchunk)
 			elseif status == "timeout" or status=="wantwrite" then
 				coroutine.yield("wantwrite")
 			elseif status == "wantread" then
-				coroutine.yield("wantread")									
+				coroutine.yield("wantread")
 			elseif status == "closed" then
-				--close connection and exit									
+				--close connection and exit
 				coroutine.yield("close")
 			end
 			pos=p
@@ -93,7 +93,7 @@ function Response:send(...)
 		table.insert(buffer,v)
 		len = len + v:len()
 	end
-	
+
 	self.len=len
 	if len>=buffersize then
 		self:flush()
@@ -109,7 +109,7 @@ function Response:sendHeaders()
 		self:send("HTTP/",self.request.version," ",self.status," ",self.statusmsg,"\r\n")
 
 		if headers.CONTENT_LENGTH then
-			headers.TRANSFER_ENCODING=nil				
+			headers.TRANSFER_ENCODING=nil
 		end
 
 		for k,v in pairs(headers) do
@@ -117,7 +117,7 @@ function Response:sendHeaders()
 		end
 		self:send("\r\n")
 		self.headerssent=true
-		self.headerssending=false							
+		self.headerssending=false
 		self.headerslen=self.len
 		self.headersindex=#buffer+1
 	end
