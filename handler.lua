@@ -64,13 +64,10 @@ local function handleFileNotFound(request,response,errormsg)
 	response.status=404
 	response.statusmsg="File Not Found"
 	response.headers.CONTENT_TYPE="text/plain;charset=UTF-8"
-	if errormsg then
-		response.headers.CONTENT_LENGTH=errormsg:len()
-		response:send(errormsg)
-	else
-		response.headers.CONTENT_LENGTH=18
-		response:send("404 File Not Found")
-	end
+
+	errormsg = errormsg or "404 File Not Found"
+	response.headers.CONTENT_LENGTH=errormsg:len()
+	response:send(errormsg)
 end
 
 
@@ -239,11 +236,7 @@ function handleRequest(request,response)
 			end
 
 			local mtype=mimetypes[ext]
-			if mtype then
-				response.headers.CONTENT_TYPE=mtype
-			else
-				response.headers.CONTENT_TYPE="application/octet"
-			end
+			response.headers.CONTENT_TYPE=mtype or "application/octet"
 
 			--support for html.gz js.gz ...
 			if mtype and gzext and request.headers.ACCEPT_ENCODING
