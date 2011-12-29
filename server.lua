@@ -184,11 +184,11 @@ local function mainLoop()
 	table.insert(rlist,ssock)
 
 	local timeoutcount=0
-	
+
 	--after timeoutcountlimit timeouts a cleanup is forced(for session and bytecode cleanup
 	local timeoutcountlimit=sessiontimeout/5
 	local timeoutdiff=sockettimeout/5
-	
+
 	math.randomseed(os.time())
 	collectgarbage("setpause",500)
 
@@ -201,7 +201,7 @@ local function mainLoop()
 			--profiler.stop()
 			--os.exit()
 			--process is idle so do some cleanup
-			if timeoutcount>timeoutcountlimit then 
+			if timeoutcount>timeoutcountlimit then
 				timestamp=os.time()
 				db.syncIfChanged()
 				http.cleanupSessions()
@@ -224,7 +224,7 @@ local function mainLoop()
 						--new client
 						local client = sock:accept()
 						if client then
-							initHttp(client)					
+							initHttp(client)
 						end
 					elseif v==ssock then
 						local client = ssock:accept()
@@ -239,7 +239,7 @@ local function mainLoop()
 					end
 				end
 			end
-		
+
 			if s then
 				for _,v in ipairs(s) do
 					if threads[v] then

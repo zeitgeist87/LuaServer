@@ -5,12 +5,12 @@ Request_mt = { __index = Request }
 
 local function parseUrl(url)
 	local params={}
-	
+
 	--shortcut
 	if url=="/" or url=="/index.lua" then
 		return url,params
 	end
-	
+
 	local path=url:match("^(/[%a%d/%.%-_%%%+]*)")
 	if not path then
 		return nil
@@ -27,13 +27,13 @@ local function parseUrl(url)
 	path=decode.unescape(path)
 	path=path:gsub("%.+/","%./")
 
-	return path,params 
+	return path,params
 end
 
 function Request:create(client,method,url,version,headers,rest)
 	local path,params=parseUrl(url)
 	if not path then
-		return nil					
+		return nil
 	end
 
 	local new_inst = {response=true,client=client,sent=0,rest=rest,method=method,url=url,path=path,get=params,version=version,headers=headers}    -- the new instance
@@ -64,7 +64,7 @@ function Request:receive()
 				elseif status == "wantwrite" then
 					coroutine.yield("wantwrite")
 				elseif status == "closed" then
-					--close connection and exit									
+					--close connection and exit
 					coroutine.yield("close")
 				end
 			end
@@ -83,14 +83,14 @@ function Request:receiveAll()
 		end
 
 		if #buffer==0 then
-			--close connection and exit									
+			--close connection and exit
 			coroutine.yield("close")
 		elseif #buffer==1 then
 			return buffer[1]
 		else
 			return table.concat(buffer)
 		end
-	end 
+	end
 end
 
 
@@ -111,7 +111,7 @@ function Request:getPost()
 		params={}
 		self.post=params
 	end
-						
+
 	return params
 end
 
@@ -132,7 +132,7 @@ function Request:getCookies()
 		params={}
 		self.cookie=params
 	end
-						
+
 	return params
 end
 
@@ -162,7 +162,7 @@ function Request:getExistingSession()
 	if self.session then
 		return self.session
 	end
-	
+
 	local cookies=self:getCookies()
 	local sid=cookies.sid
 	local sessions=sessions
@@ -187,14 +187,14 @@ function Request:getSession()
 	if s then
 		return s
 	end
-	
+
 	--create new session
 	local sid
 	local sessions=sessions
 	repeat
 		sid=uniqueId(16)
 	until not sessions[sid]
-	
+
 	sessions[sid]={}
 	sessions[sid].timestamp=timestamp
 	sessions[sid].sid=sid
@@ -215,7 +215,7 @@ function Request:changeSessionId()
 		repeat
 			sid=uniqueId(16)
 		until not sessions[sid]
-		
+
 		sessions[sid]=s
 		s.timestamp=timestamp
 		s.sid=sid
