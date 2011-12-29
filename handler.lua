@@ -79,7 +79,7 @@ local function parseHttpDate(date)
 		local day,month,year,hour,min,sec=date:match("^%a%a%a, (%d%d) (%a%a%a) (%d%d%d%d) (%d%d):(%d%d):(%d%d) GMT$")
 		if day then
 			return os.time({day=tonumber(day),month=monthtable[month],year=tonumber(year),hour=tonumber(hour),min=tonumber(min),sec=tonumber(sec),isdst=false})
-		end	
+		end
 	end
 	return nil
 end
@@ -97,7 +97,7 @@ local function include(path,attr,request,response,rootdir)
 			if not attr or attr.mode ~= "file" then
 				handleFileNotFound(request,response,errormsg)
 				return
-			end		
+			end
 		end
 	end
 
@@ -116,7 +116,7 @@ local function include(path,attr,request,response,rootdir)
 		fd:close()
 		local start=input:sub(1,2)
 		if start=="<?" then
-			--allow to set headers 
+			--allow to set headers
 			input=input:sub(3)
 		end
 
@@ -129,24 +129,24 @@ local function include(path,attr,request,response,rootdir)
 		input=input:gsub("<%?%s*send%(","]===],")
 		input=input:gsub("<%?","]===])\n")
 		input=input:gsub("%?>","\nres:send([===[")
-		
+
 		--experimentell
 		--input=input:gsub("%ssend%(","\nres:send(")
 		input=input:gsub("([^:%w_])send%(","%1res:send(")
 		input=input:gsub("([%s,;%(%)])include%(([^%),]+)%)","%1include(%2,nil,req,res,root)")
-		
+
 		input=input:gsub("send%(([^%)]+)%)%s*res:send%(","send(%1,")
 		input=input:gsub("send%(([^%)]+)%)%s*res:send%(","send(%1,")
-		
-		
-		
-		
+
+
+
+
 		if start=="<?" then
 			start=""
 		else
 			start="res:send([===["
 		end
-		
+
 		input="return function(req,res,include,root)\n" .. start .. input .. "]===])\nend"
 		input,errormsg=loadstring(input)
 		if input then
@@ -185,7 +185,7 @@ function handleRequest(request,response)
 			host=host:match("^[%d%a%.]+")
 		end
 
-		
+
 		path=domains[host]
 		request.host=host
 		if not path then
@@ -228,7 +228,7 @@ function handleRequest(request,response)
 			response.headers.EXPIRES=printHttpDate(2*timestamp-attr.modification+2*24*60*60)
 			response.headers.LAST_MODIFIED=printHttpDate(attr.modification)
 			--response.headers.ACCEPT_RANGES="bytes"
-			
+
 			local modsince=parseHttpDate(request.headers.IF_MODIFIED_SINCE)
 			if modsince and attr.modification-modsince<=0 then
 				response.status=304
@@ -240,27 +240,27 @@ function handleRequest(request,response)
 
 			local mtype=mimetypes[ext]
 			if mtype then
-				response.headers.CONTENT_TYPE=mtype			
+				response.headers.CONTENT_TYPE=mtype
 			else
 				response.headers.CONTENT_TYPE="application/octet"
 			end
 
 			--support for html.gz js.gz ...
-			if mtype and gzext and request.headers.ACCEPT_ENCODING 
+			if mtype and gzext and request.headers.ACCEPT_ENCODING
 				and request.headers.ACCEPT_ENCODING:match("gzip") then
 				response.headers.CONTENT_ENCODING="gzip"
 			end
-			
+
 			--send file
 			local range=nil
 			if request.headers.RANGE then
 				local r=request.headers.RANGE:match("bytes%s*=%s*(%d+)%s*%-")
 				if r then
-					range=tonumber(r)				
-				end	
+					range=tonumber(r)
+				end
 			end
 
-			
+
 			local fd=io.open(path,"r")
 			if fd then
 				response.headers.CONTENT_LENGTH=attr.size
@@ -270,7 +270,7 @@ function handleRequest(request,response)
 					response.statusmsg="Partial content"
 					response.headers.CONTENT_LENGTH=attr.size-range
 					response.headers.CONTENT_RANGE="bytes " .. range .. "-" .. attr.size-1 .. "/" .. attr.size
-				end			
+				end
 				response:sendFile(fd)
 				fd:close()
 			else
@@ -279,5 +279,5 @@ function handleRequest(request,response)
 		end
 	else
 		handleFileNotFound(request,response)
-	end	
+	end
 end
