@@ -45,19 +45,20 @@ sessiontimeout=30*60
 bytecachetimeout=24*60*60
 local sockettimeout=5*60
 rewriterules={}
-table.insert(rewriterules,function(req)
-		local year,month,day,id=req.path:match("^/(%d%d%d%d)/(%d%d)/(%d%d)/([%w%-_]+)")
-		if year then
-			id=id:gsub("%-","_")
-			req.path="/article.lua"
-			req.get.year=year
-			req.get.month=month
-			req.get.day=day
-			req.get.id=id
-			return true
-		end
-		return false
-	end)
+--rewrite rule example
+--table.insert(rewriterules,function(req)
+--		local year,month,day,id=req.path:match("^/(%d%d%d%d)/(%d%d)/(%d%d)/([%w%-_]+)")
+--		if year then
+--			id=id:gsub("%-","_")
+--			req.path="/article.lua"
+--			req.get.year=year
+--			req.get.month=month
+--			req.get.day=day
+--			req.get.id=id
+--			return true
+--		end
+--		return false
+--	end)
 --config
 
 
