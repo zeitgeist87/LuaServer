@@ -81,11 +81,15 @@ function Response:redirect(location)
 	self:sendHeaders()
 end
 
-function Response:send(...)
-	if not self.headerssent then
-		self:sendHeaders()
-	end
+function Response:send_with_headers(...)
+	-- headers have been sent, send only data
+	self.send = self.send_data
+	self:sendHeaders()
+	self.headerssent=true
+	self:send_data(...)
+end
 
+function Response:send_data(...)
 	local buffer=self.buffer
 	local len=self.len
 	for n=1,select('#',...) do
@@ -100,12 +104,18 @@ function Response:send(...)
 	end
 end
 
+-- initially "send" also includes headers
+Response.send = Response.send_with_headers
+
+
 function Response:sendHeaders()
-	if not self.headerssent and not self.headerssending then
+	if not self.headerssending then
 		local headers=self.headers
 		local buffer=self.buffer
 
 		self.headerssending=true
+		-- headers have been sent, send only data
+		self.send = self.send_data
 		self:send("HTTP/",self.request.version," ",self.status," ",self.statusmsg,"\r\n")
 
 		if headers.CONTENT_LENGTH then
