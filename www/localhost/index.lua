@@ -14,6 +14,11 @@ local s=req:getSession()
 
 	c=c+1
 
+	--length of the output must not change,
+	--because this is reported as an error in benchmark tools
+	if c>9 then
+		c=0
+	end
 	send("It works! Number: ", c) 
 
 	db.put("count",c)
@@ -30,6 +35,12 @@ local s=req:getSession()
 	end
 
 	c=c+1
+	
+	--length of the output must not change,
+	--because this is reported as an error in benchmark tools
+	if c>9 then
+		c=0
+	end
 	send("It works! Number: ", c) 
 
 	s.c=c
