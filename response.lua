@@ -3,7 +3,7 @@ Response_mt = { __index = Response }
 
 function Response:create(request)
 	local new_inst = {request=request,status=200,statusmsg="OK",headers={TRANSFER_ENCODING="chunked"},buffer={},len=0,
-			headerslen=0,headersindex=1,firstchunk=true}
+			headersindex=1}
 	if request.headers.CONNECTION=="keep-alive" then
 		new_inst.headers.CONNECTION="keep-alive"
 	end
@@ -33,13 +33,11 @@ function Response:flush(lastchunk)
 		if chunked then
 			local pattern = "%X"
 			table.insert(buffer,self.headersindex,"\r\n")
-			table.insert(buffer,self.headersindex,pattern:format(self.len-self.headerslen))
-			if not self.firstchunk then
+			table.insert(buffer,self.headersindex,pattern:format(self.len))
+			if self.headersindex==1 then
 				table.insert(buffer,self.headersindex,"\r\n")
 			end
-			self.firstchunk=false
 			self.headersindex=1
-			self.headerslen=0
 		end
 
 		local data=nil
@@ -105,14 +103,11 @@ end
 
 function Response:send_no_flush(...)
 	local buffer=self.buffer
-	local len=self.len
+
 	for n=1,select('#',...) do
 		local v = tostring(select(n,...))
 		table.insert(buffer,v)
-		len = len + v:len()
 	end
-
-	self.len=len
 end
 
 -- initially "send" also includes headers
@@ -136,7 +131,6 @@ function Response:sendHeaders()
 	end
 	send(self,"\r\n")
 
-	self.headerslen=self.len
 	self.headersindex=#buffer+1
 end
 
