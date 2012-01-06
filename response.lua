@@ -3,7 +3,7 @@ Response_mt = { __index = Response }
 
 function Response:create(request)
 	local new_inst = {request=request,status=200,statusmsg="OK",headers={TRANSFER_ENCODING="chunked"},buffer={},len=0,
-			headerssent=false,headerssending=false,headerslen=0,headersindex=1,firstchunk=true}
+			headerslen=0,headersindex=1,firstchunk=true}
 	if request.headers.CONNECTION=="keep-alive" then
 		new_inst.headers.CONNECTION="keep-alive"
 	end
@@ -18,7 +18,7 @@ function Response:create(request)
 end
 
 function Response:flush(lastchunk)
-	local chunked=self.headers.TRANSFER_ENCODING == "chunked" and self.headerssent
+	local chunked=self.headers.TRANSFER_ENCODING == "chunked"
 	local buffer=self.buffer
 
 	if chunked and lastchunk then
@@ -82,10 +82,9 @@ function Response:redirect(location)
 end
 
 function Response:send_with_headers(...)
+	self:sendHeaders()
 	-- headers have been sent, send only data
 	self.send = self.send_data
-	self:sendHeaders()
-	self.headerssent=true
 	self:send_data(...)
 end
 
@@ -104,33 +103,41 @@ function Response:send_data(...)
 	end
 end
 
+function Response:send_no_flush(...)
+	local buffer=self.buffer
+	local len=self.len
+	for n=1,select('#',...) do
+		local v = tostring(select(n,...))
+		table.insert(buffer,v)
+		len = len + v:len()
+	end
+
+	self.len=len
+end
+
 -- initially "send" also includes headers
 Response.send = Response.send_with_headers
 
 
 function Response:sendHeaders()
-	if not self.headerssending then
-		local headers=self.headers
-		local buffer=self.buffer
+	local headers=self.headers
+	local buffer=self.buffer
+	
+	local send = self.send_no_flush
 
-		self.headerssending=true
-		-- headers have been sent, send only data
-		self.send = self.send_data
-		self:send("HTTP/",self.request.version," ",self.status," ",self.statusmsg,"\r\n")
+	send(self,"HTTP/",self.request.version," ",self.status," ",self.statusmsg,"\r\n")
 
-		if headers.CONTENT_LENGTH then
-			headers.TRANSFER_ENCODING=nil
-		end
-
-		for k,v in pairs(headers) do
-			self:send(k:gsub("_", "%-"),": ",v,"\r\n")
-		end
-		self:send("\r\n")
-		self.headerssent=true
-		self.headerssending=false
-		self.headerslen=self.len
-		self.headersindex=#buffer+1
+	if headers.CONTENT_LENGTH then
+		headers.TRANSFER_ENCODING=nil
 	end
+
+	for k,v in pairs(headers) do
+		send(self,k:gsub("_", "%-"),": ",v,"\r\n")
+	end
+	send(self,"\r\n")
+
+	self.headerslen=self.len
+	self.headersindex=#buffer+1
 end
 
 function Response:sendFile(fd)
