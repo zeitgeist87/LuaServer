@@ -86,7 +86,7 @@ function receiveRequest(client)
 					while p1 do
 						p1,p2,key,value =s:find("^([%a%-%.]+):%s+([^\r]+)\r\n",p2+1)
 						if p1 then
-							headers[key:upper():gsub("%-", "_")]=value
+							headers[key:upper():gsub("%-", "_")]=value:lower()
 						end
 					end
 					--free buffer for gc
