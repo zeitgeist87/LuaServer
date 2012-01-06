@@ -83,30 +83,23 @@ function Response:send_with_headers(...)
 	self:sendHeaders()
 	-- headers have been sent, send only data
 	self.send = self.send_data
-	self:send_data(...)
+	self:send(...)
 end
 
 function Response:send_data(...)
 	local buffer=self.buffer
 	local len=self.len
+	local insert=table.insert
+	
 	for n=1,select('#',...) do
 		local v = tostring(select(n,...))
-		table.insert(buffer,v)
+		insert(buffer,v)
 		len = len + v:len()
 	end
 
 	self.len=len
 	if len>=buffersize then
 		self:flush()
-	end
-end
-
-function Response:send_no_flush(...)
-	local buffer=self.buffer
-
-	for n=1,select('#',...) do
-		local v = tostring(select(n,...))
-		table.insert(buffer,v)
 	end
 end
 
@@ -117,19 +110,27 @@ Response.send = Response.send_with_headers
 function Response:sendHeaders()
 	local headers=self.headers
 	local buffer=self.buffer
-	
-	local send = self.send_no_flush
+	local insert=table.insert
 
-	send(self,"HTTP/",self.request.version," ",self.status," ",self.statusmsg,"\r\n")
+	insert(buffer,"HTTP/")
+	insert(buffer,self.request.version)
+	insert(buffer,self.status)
+	insert(buffer," ")
+	insert(buffer,self.statusmsg)
+	insert(buffer,"\r\n")
 
 	if headers.CONTENT_LENGTH then
 		headers.TRANSFER_ENCODING=nil
 	end
 
 	for k,v in pairs(headers) do
-		send(self,k:gsub("_", "%-"),": ",v,"\r\n")
+		k=k:gsub("_", "%-")
+		insert(buffer,k)
+		insert(buffer,": ")
+		insert(buffer,v)
+		insert(buffer,"\r\n")
 	end
-	send(self,"\r\n")
+	insert(buffer,"\r\n")
 
 	self.headersindex=#buffer+1
 end
