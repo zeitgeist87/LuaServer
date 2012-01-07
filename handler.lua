@@ -117,6 +117,24 @@ local function include(path,attr,request,response,rootdir)
 			input=input:sub(3)
 		end
 
+		--inline includes with constant path
+		local pos=1
+		while pos do
+			local start,stop,path = input:find("%sinclude%([\"\']([^\"\']+)[\"\']%)%s",pos)
+			pos=stop
+			if path then
+				local fd=io.open(path,"r")
+				if fd then
+					local input2=fd:read("*all")
+					fd:close()
+					if input2 then
+						input=input:sub(1,start) .. "?>" .. input2 .. "<?" .. input:sub(stop+1)
+						pos=start
+					end
+				end
+			end
+		end
+
 		--minify probably not safe for lua/js code!!!
 		input=input:gsub("\n%s+","\n")
 		input=input:gsub("%s+\n","\n")
