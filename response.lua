@@ -17,12 +17,64 @@ function Response:create(request)
 	return new_inst
 end
 
+function Response:sendFile(fd)
+	local ret=fd:read(buffersize)
+	local count=0
+	while ret do
+		count=count+1
+		if count==50 then
+			--let others do something
+			count=0
+			coroutine.yield()
+		end
+		self:send(ret)
+		ret=fd:read(buffersize)
+	end
+end
+
+function Response:setCookie(k,v,s,h)
+	local cookie=k .. "=" .. v
+
+	if s then
+		cookie=cookie .. "; secure"
+	end
+
+	if h then
+		cookie=cookie .. "; HttpOnly"
+	end
+
+	local headers=self.headers
+	if headers.SET_COOKIE then
+		headers.SET_COOKIE=headers.SET_COOKIE .. "; " .. cookie
+	else
+		headers.SET_COOKIE=cookie
+	end
+end
+
+function Response:redirect(location)
+	self.headers.LOCATION=location
+	self.status=302
+	self.statusmsg="Found"
+	self:sendHeaders()
+end
+
+function Response:send_with_headers(...)
+	self:sendHeaders()
+	-- headers have been sent, send only data
+	self.send = self.send_data
+	self:send(...)
+end
+
+local insert=table.insert
+local tostring = tostring
+local select = select
+
 function Response:flush(lastchunk)
 	local chunked=self.headers.TRANSFER_ENCODING == "chunked"
 	local buffer=self.buffer
 
 	if chunked and lastchunk then
-		table.insert(buffer,"\r\n0\r\n\r\n")
+		insert(buffer,"\r\n0\r\n\r\n")
 		if self.len<=0 then
 			chunked=false
 			self.len=7
@@ -32,10 +84,10 @@ function Response:flush(lastchunk)
 	if self.len>0 then
 		if chunked then
 			local pattern = "%X"
-			table.insert(buffer,self.headersindex,"\r\n")
-			table.insert(buffer,self.headersindex,pattern:format(self.len))
+			insert(buffer,self.headersindex,"\r\n")
+			insert(buffer,self.headersindex,pattern:format(self.len))
 			if self.headersindex==1 then
-				table.insert(buffer,self.headersindex,"\r\n")
+				insert(buffer,self.headersindex,"\r\n")
 			end
 			self.headersindex=1
 		end
@@ -69,26 +121,6 @@ function Response:flush(lastchunk)
 		end
 	end
 end
-
-
-
-function Response:redirect(location)
-	self.headers.LOCATION=location
-	self.status=302
-	self.statusmsg="Found"
-	self:sendHeaders()
-end
-
-function Response:send_with_headers(...)
-	self:sendHeaders()
-	-- headers have been sent, send only data
-	self.send = self.send_data
-	self:send(...)
-end
-
-local insert=table.insert
-local tostring = tostring
-local select = select
 
 function Response:send_data(...)
 	local buffer=self.buffer
@@ -136,38 +168,4 @@ function Response:sendHeaders()
 	insert(buffer,"\r\n")
 
 	self.headersindex=#buffer+1
-end
-
-function Response:sendFile(fd)
-	local ret=fd:read(buffersize)
-	local count=0
-	while ret do
-		count=count+1
-		if count==50 then
-			--let others do something
-			count=0
-			coroutine.yield()
-		end
-		self:send(ret)
-		ret=fd:read(buffersize)
-	end
-end
-
-function Response:setCookie(k,v,s,h)
-	local cookie=k .. "=" .. v
-
-	if s then
-		cookie=cookie .. "; secure"
-	end
-
-	if h then
-		cookie=cookie .. "; HttpOnly"
-	end
-
-	local headers=self.headers
-	if headers.SET_COOKIE then
-		headers.SET_COOKIE=headers.SET_COOKIE .. "; " .. cookie
-	else
-		headers.SET_COOKIE=cookie
-	end
 end
