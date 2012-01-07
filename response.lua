@@ -17,21 +17,6 @@ function Response:create(request)
 	return new_inst
 end
 
-function Response:sendFile(fd)
-	local ret=fd:read(buffersize)
-	local count=0
-	while ret do
-		count=count+1
-		if count==50 then
-			--let others do something
-			count=0
-			coroutine.yield()
-		end
-		self:send(ret)
-		ret=fd:read(buffersize)
-	end
-end
-
 function Response:setCookie(k,v,s,h)
 	local cookie=k .. "=" .. v
 
@@ -70,6 +55,21 @@ local insert=table.insert
 local tostring = tostring
 local select = select
 local buffersize=buffersize
+
+function Response:sendFile(fd)
+	local ret=fd:read(buffersize)
+	local count=0
+	while ret do
+		count=count+1
+		if count==50 then
+			--let others do something
+			count=0
+			coroutine.yield()
+		end
+		self:send(ret)
+		ret=fd:read(buffersize)
+	end
+end
 
 function Response:flush(lastchunk)
 	local chunked=self.headers.TRANSFER_ENCODING == "chunked"
