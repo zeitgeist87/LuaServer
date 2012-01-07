@@ -144,18 +144,17 @@ function Request.htmlspecialchars(s)
 end
 
 local function uniqueId(bytes)
-	local fp    = io.open("/dev/urandom")
-	local chunk = { fp:read(bytes):byte(1, bytes) }
-	fp:close()
-
-	local hex = ""
-
+	local buffer = {}
 	local pattern = "%02X"
-	for _, byte in ipairs(chunk) do
-		hex = hex .. pattern:format(byte)
+	local random = math.random
+	local insert = table.insert
+
+	for i=1,bytes do
+		local byte = random(255)
+		insert(buffer, pattern:format(byte))
 	end
 
-	return hex
+	return table.concat(buffer, "")
 end
 
 function Request:getExistingSession()
