@@ -136,8 +136,6 @@ local function include(path,attr,request,response,rootdir)
 		input=input:gsub("send%(([^%)]+)%)%s*res:send%(","send(%1,")
 
 
-
-
 		if start=="<?" then
 			start=""
 		else
@@ -145,6 +143,10 @@ local function include(path,attr,request,response,rootdir)
 		end
 
 		input="return function(req,res,include,root)\n" .. start .. input .. "]===])\nend"
+		
+		--avoid overhead of select
+		input=input:gsub("res:send%(([^,]+)%)","res:send_single(%1)")
+		
 		input,errormsg=loadstring(input)
 		if input then
 			script=input()

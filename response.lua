@@ -62,12 +62,14 @@ function Response:send_with_headers(...)
 	self:sendHeaders()
 	-- headers have been sent, send only data
 	self.send = self.send_data
+	self.send_single = self.send_single_data
 	self:send(...)
 end
 
 local insert=table.insert
 local tostring = tostring
 local select = select
+local buffersize=buffersize
 
 function Response:flush(lastchunk)
 	local chunked=self.headers.TRANSFER_ENCODING == "chunked"
@@ -141,9 +143,19 @@ function Response:send_data(...)
 	end
 end
 
+function Response:send_single_data(input)
+	local v = tostring(input)
+	insert(self.buffer,v)
+	self.len = self.len + v:len()
+
+	if self.len>=buffersize then
+		self:flush()
+	end
+end
+
 -- initially "send" also includes headers
 Response.send = Response.send_with_headers
-
+Response.send_single = Response.send_with_headers
 
 function Response:sendHeaders()
 	local headers=self.headers
@@ -152,6 +164,7 @@ function Response:sendHeaders()
 	
 	insert(buffer,"HTTP/")
 	insert(buffer,self.request.version)
+	insert(buffer," ")
 	insert(buffer,self.status)
 	insert(buffer," ")
 	insert(buffer,self.statusmsg)
