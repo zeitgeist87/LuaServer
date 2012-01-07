@@ -143,6 +143,9 @@ function Request.htmlspecialchars(s)
 	return s
 end
 
+
+math.randomseed(os.time())
+
 local function uniqueId(bytes)
 	local buffer = {}
 	local pattern = "%02X"
