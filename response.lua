@@ -125,7 +125,9 @@ end
 function Response:send_data(...)
 	local buffer=self.buffer
 	local len=self.len
-
+	local insert=insert
+	local tostring=tostring
+	local select=select
 
 	for n=1,select('#',...) do
 		local v = tostring(select(n,...))
@@ -146,7 +148,8 @@ Response.send = Response.send_with_headers
 function Response:sendHeaders()
 	local headers=self.headers
 	local buffer=self.buffer
-
+	local insert=insert
+	
 	insert(buffer,"HTTP/")
 	insert(buffer,self.request.version)
 	insert(buffer,self.status)
