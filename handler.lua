@@ -134,6 +134,9 @@ local function include(path,attr,request,response,rootdir)
 				end
 			end
 		end
+		
+		--cleanup
+		input=input:gsub("<%?%s*%?>","")
 
 		--minify probably not safe for lua/js code!!!
 		input=input:gsub("\n%s+","\n")
@@ -162,6 +165,15 @@ local function include(path,attr,request,response,rootdir)
 
 		input="return function(req,res,include,root)\n" .. start .. input .. "]===])\nend"
 		
+		--compile time concat
+		input=input:gsub("%]===%]%s*,%s*%[===%[","")
+		input=input:gsub("\"%s*,%s*\"","")
+		input=input:gsub("\'%s*,%s*\'","")
+		input=input:gsub("%]===%]%s*,%s*\"([^\"]*)\"","%1]===]")
+		--again rule 1
+		input=input:gsub("%]===%]%s*,%s*%[===%[","")
+		input=input:gsub("\"%s*,%s*%[===%[([^%]]*)%]===%]","%1\"")
+
 		--avoid overhead of select
 		input=input:gsub("res:send%(([^,]+)%)","res:send_single(%1)")
 		
