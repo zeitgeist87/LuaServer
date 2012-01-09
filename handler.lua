@@ -176,6 +176,8 @@ local function include(path,attr,request,response,rootdir)
 
 		--avoid overhead of select
 		input=input:gsub("res:send%(([^,]+)%)","res:send_single(%1)")
+		input=input:gsub("res:send%(([^,]+)%s*,%s*([^,]+)%)","res:send_double(%1,%2)")
+
 		
 		input,errormsg=loadstring(input)
 		if input then

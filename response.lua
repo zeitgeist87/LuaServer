@@ -48,6 +48,7 @@ function Response:send_with_headers(...)
 	-- headers have been sent, send only data
 	self.send = self.send_data
 	self.send_single = self.send_single_data
+	self.send_double = self.send_double_data
 	self:send(...)
 end
 
@@ -153,9 +154,24 @@ function Response:send_single_data(input)
 	end
 end
 
+function Response:send_double_data(i1,i2)
+	local v = tostring(i1)
+	insert(self.buffer,v)
+	self.len = self.len + v:len()
+
+	v = tostring(i2)
+	insert(self.buffer,v)
+	self.len = self.len + v:len()
+
+	if self.len>=buffersize then
+		self:flush()
+	end
+end
+
 -- initially "send" also includes headers
 Response.send = Response.send_with_headers
 Response.send_single = Response.send_with_headers
+Response.send_double = Response.send_with_headers
 
 function Response:sendHeaders()
 	local headers=self.headers
