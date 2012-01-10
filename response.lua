@@ -2,7 +2,7 @@ Response = {}
 Response_mt = { __index = Response }
 
 function Response:create(request)
-	local new_inst = {request=request,status=200,statusmsg="OK",headers={TRANSFER_ENCODING="chunked"},buffer={},len=0,
+	local new_inst = {request=request,status=200,statusmsg="OK",headers={TRANSFER_ENCODING="chunked"},buffer=nil,len=0,
 			headersindex=1}
 	if request.headers.CONNECTION=="keep-alive" then
 		new_inst.headers.CONNECTION="keep-alive"
@@ -170,20 +170,12 @@ Response.send_single = Response.send_with_headers
 Response.send_double = Response.send_with_headers
 
 function Response:sendHeaders()
-	if self.send ~= self.send_with_headers then
+	if self.buffer then
 		return
 	end
 	local headers=self.headers
-	local buffer=self.buffer
+	local buffer={"HTTP/",self.request.version," ", self.status, " ", self.statusmsg, "\r\n"}
 	local insert=insert
-	
-	insert(buffer,"HTTP/")
-	insert(buffer,self.request.version)
-	insert(buffer," ")
-	insert(buffer,self.status)
-	insert(buffer," ")
-	insert(buffer,self.statusmsg)
-	insert(buffer,"\r\n")
 
 	if headers.CONTENT_LENGTH then
 		headers.TRANSFER_ENCODING=nil
@@ -198,6 +190,7 @@ function Response:sendHeaders()
 	end
 	insert(buffer,"\r\n")
 
+	self.buffer=buffer
 	-- headers have been sent, send only data
 	self.send = self.send_data
 	self.send_single = self.send_single_data
