@@ -146,18 +146,12 @@ end
 
 math.randomseed(os.time())
 
-local function uniqueId(bytes)
-	local buffer = {}
-	local pattern = "%02X"
+local function uniqueId()
 	local random = math.random
-	local insert = table.insert
+	local buffer = {random(255),random(255),random(255),random(255),random(255),random(255),random(255),random(255),
+	random(255),random(255),random(255),random(255),random(255),random(255),random(255),random(255)}
 
-	for i=1,bytes do
-		local byte = random(255)
-		insert(buffer, pattern:format(byte))
-	end
-
-	return table.concat(buffer, "")
+	return table.concat(buffer)
 end
 
 function Request:getExistingSession()
@@ -194,7 +188,7 @@ function Request:getSession()
 	local sid
 	local sessions=sessions
 	repeat
-		sid=uniqueId(16)
+		sid=uniqueId()
 	until not sessions[sid]
 
 	sessions[sid]={}
@@ -215,7 +209,7 @@ function Request:changeSessionId()
 		local sid
 		local sessions=sessions
 		repeat
-			sid=uniqueId(16)
+			sid=uniqueId()
 		until not sessions[sid]
 
 		sessions[sid]=s
