@@ -191,13 +191,14 @@ function Request:getSession()
 		sid=uniqueId()
 	until not sessions[sid]
 
-	sessions[sid]={}
-	sessions[sid].timestamp=timestamp
-	sessions[sid].sid=sid
+	s={}
+	sessions[sid]=s
+	s.timestamp=timestamp
+	s.sid=sid
 	local cookies=self:getCookies()
 	cookies.sid=sid
 	self.response:setCookie("sid",sid,self:isSecure(),true)
-	return sessions[sid]
+	return s
 end
 
 function Request:changeSessionId()
