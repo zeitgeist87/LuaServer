@@ -45,10 +45,6 @@ end
 
 function Response:send_with_headers(...)
 	self:sendHeaders()
-	-- headers have been sent, send only data
-	self.send = self.send_data
-	self.send_single = self.send_single_data
-	self.send_double = self.send_double_data
 	self:send(...)
 end
 
@@ -174,6 +170,9 @@ Response.send_single = Response.send_with_headers
 Response.send_double = Response.send_with_headers
 
 function Response:sendHeaders()
+	if self.send ~= self.send_with_headers then
+		return
+	end
 	local headers=self.headers
 	local buffer=self.buffer
 	local insert=insert
@@ -199,5 +198,9 @@ function Response:sendHeaders()
 	end
 	insert(buffer,"\r\n")
 
+	-- headers have been sent, send only data
+	self.send = self.send_data
+	self.send_single = self.send_single_data
+	self.send_double = self.send_double_data
 	self.headersindex=#buffer+1
 end
