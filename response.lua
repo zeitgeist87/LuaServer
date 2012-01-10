@@ -71,9 +71,11 @@ end
 function Response:flush(lastchunk)
 	local chunked=self.headers.TRANSFER_ENCODING == "chunked"
 	local buffer=self.buffer
+	local bsize=#buffer
 
 	if chunked and lastchunk then
-		insert(buffer,"\r\n0\r\n\r\n")
+		bsize=bsize+1
+		buffer[bsize]="\r\n0\r\n\r\n"
 		if self.len<=0 then
 			chunked=false
 			self.len=7
@@ -92,7 +94,7 @@ function Response:flush(lastchunk)
 		end
 
 		local data=nil
-		if #buffer==1 then
+		if bsize==1 then
 			data=buffer[1]
 		else
 			data=table.concat(buffer)
@@ -123,14 +125,14 @@ end
 
 function Response:send_data(...)
 	local buffer=self.buffer
+	local bsize=#buffer
 	local len=self.len
-	local insert=insert
 	local tostring=tostring
 	local select=select
 
 	for n=1,select('#',...) do
 		local v = tostring(select(n,...))
-		insert(buffer,v)
+		buffer[bsize+n]=v
 		len = len + v:len()
 	end
 
@@ -142,7 +144,7 @@ end
 
 function Response:send_single_data(input)
 	local v = tostring(input)
-	insert(self.buffer,v)
+	self.buffer[#self.buffer+1]=v
 	self.len = self.len + v:len()
 
 	if self.len>=buffersize then
@@ -152,11 +154,14 @@ end
 
 function Response:send_double_data(i1,i2)
 	local v = tostring(i1)
-	insert(self.buffer,v)
+	local buffer=self.buffer
+	local bsize=#buffer+1
+	
+	buffer[bsize]=v
 	self.len = self.len + v:len()
 
 	v = tostring(i2)
-	insert(self.buffer,v)
+	buffer[bsize+1]=v
 	self.len = self.len + v:len()
 
 	if self.len>=buffersize then
@@ -175,20 +180,20 @@ function Response:sendHeaders()
 	end
 	local headers=self.headers
 	local buffer={"HTTP/",self.request.version," ", self.status, " ", self.statusmsg, "\r\n"}
-	local insert=insert
+	local bsize=#buffer+1
 
 	if headers.CONTENT_LENGTH then
 		headers.TRANSFER_ENCODING=nil
 	end
 
 	for k,v in pairs(headers) do
-		k=k:gsub("_", "%-")
-		insert(buffer,k)
-		insert(buffer,": ")
-		insert(buffer,v)
-		insert(buffer,"\r\n")
+		buffer[bsize]=k:gsub("_", "%-")
+		buffer[bsize+1]=": "
+		buffer[bsize+2]=v
+		buffer[bsize+3]="\r\n"
+		bsize=bsize+4
 	end
-	insert(buffer,"\r\n")
+	buffer[bsize]="\r\n"
 
 	self.buffer=buffer
 	-- headers have been sent, send only data
