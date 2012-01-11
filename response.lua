@@ -104,7 +104,8 @@ function Response:flush(lastchunk)
 		local pos=0
 		local client=self.request.client
 		buffer=nil
-		self.buffer={}
+		--initialize buffer with 4 opcode NEWTABLE 0 4 0 instead of NEWTABLE 0 0 0
+		self.buffer={nil,nil,nil,nil}
 		self.len=0
 
 		while true do
