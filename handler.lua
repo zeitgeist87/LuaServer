@@ -172,7 +172,7 @@ local function include(path,attr,request,response,rootdir)
 		input=input:gsub("%]===%]%s*,%s*\"([^\"]*)\"","%1]===]")
 		--again rule 1
 		input=input:gsub("%]===%]%s*,%s*%[===%[","")
-		input=input:gsub("\"%s*,%s*%[===%[([^%]]*)%]===%]","%1\"")
+		input=input:gsub("\"([^\"]*)\"%s*,%s*%[===%[","[===[%1")
 
 		--insert explicit sendHeaders before the first send
 		input=input:gsub("res:send%(","res:sendHeaders()\nres:send(",1)

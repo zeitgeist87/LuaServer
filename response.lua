@@ -48,6 +48,7 @@ function Response:send_with_headers(...)
 	self:send(...)
 end
 
+--TODO revert local alias for luajit?
 local insert=table.insert
 local tostring = tostring
 local select = select
@@ -124,6 +125,7 @@ function Response:flush(lastchunk)
 end
 
 function Response:send_data(...)
+	--TODO revert local alias for luajit?
 	local buffer=self.buffer
 	local bsize=#buffer
 	local len=self.len

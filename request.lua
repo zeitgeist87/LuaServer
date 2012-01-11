@@ -147,6 +147,7 @@ end
 math.randomseed(os.time())
 
 local function uniqueId()
+	--TODO revert local alias for luajit?
 	local random = math.random
 	local buffer = {random(255),random(255),random(255),random(255),random(255),random(255),random(255),random(255),
 	random(255),random(255),random(255),random(255),random(255),random(255),random(255),random(255)}
@@ -191,6 +192,7 @@ function Request:getSession()
 		sid=uniqueId()
 	until not sessions[sid]
 
+	--TODO revert local alias for luajit?
 	s={}
 	sessions[sid]=s
 	s.timestamp=timestamp
@@ -213,6 +215,7 @@ function Request:changeSessionId()
 			sid=uniqueId()
 		until not sessions[sid]
 
+		--TODO revert local alias for luajit?
 		sessions[sid]=s
 		s.timestamp=timestamp
 		s.sid=sid
