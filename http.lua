@@ -79,7 +79,7 @@ function receiveRequest(client)
 				--free buffer for gc
 				buffer=nil
 
-				local p1,p2,method,url,version =s:find("^(%a%a%a%a?) ([^%s]+) HTTP/(%d%.%d)\r\n")
+				local p1,p2,method,url,version =s:find("^(%a%a%a%a?) (/[^%s]*) HTTP/(%d%.%d)\r\n")
 				if method == "GET" or method == "POST" then
 					headers={}
 					local key,value

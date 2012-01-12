@@ -3,6 +3,15 @@ local decode = require("socket.url")
 Request = {}
 Request_mt = { __index = Request }
 
+--local function filterNullBytes(s)
+--	for i=1,s:len() do
+--		if s:byte(i) == 0 then
+--			return s:sub(1,i-1)
+--		end
+--	end
+--	return s
+--end
+
 local function parseUrl(url)
 	local params={}
 
@@ -21,12 +30,17 @@ local function parseUrl(url)
 
 	if query then
 		for k,v in query:gmatch("([%a_]+)=([^&]+)") do
-			params[k]=decode.unescape(v:gsub("%+"," "))
+			--always check for null bytes (white lists gsub("\0","") does not work)
+			params[k]=decode.unescape(v:gsub("%+"," "):gsub("%%00",""))
 		end
 	end
-	path=decode.unescape(path)
-	path=path:gsub("%.+/","%./")
-
+	--do not allow null bytes in path
+	--/index.lua%00.jpg downloads the source code of index.lua
+	--because null bytes are allowed in lua but not in the c functions underneath
+	--http://en.wikipedia.org/wiki/Directory_traversal_attack
+	--UTF8 Directory Traversal Vulnerability?
+	path=decode.unescape(path:gsub("%+"," "):gsub("%%00",""))
+	path=path:gsub("%.+%s*/","")
 	return path,params
 end
 
@@ -102,7 +116,8 @@ function Request:getPost()
 		local query=self:receiveAll()
 		params={}
 		for k,v in query:gmatch("([%a_]+)=([%a%d%%%+_%-%.%*]+)") do
-			params[k]=decode.unescape(v:gsub("%+"," "))
+			--always check for null bytes (white lists gsub("\0","") does not work!)
+			params[k]=decode.unescape(v:gsub("%+"," "):gsub("%%00",""))
 		end
 		self.post=params
 	end
