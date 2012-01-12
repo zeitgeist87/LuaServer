@@ -39,7 +39,7 @@ local function parseUrl(url)
 	--because null bytes are allowed in lua but not in the c functions underneath
 	--http://en.wikipedia.org/wiki/Directory_traversal_attack
 	--UTF8 Directory Traversal Vulnerability?
-	path=decode.unescape(path:gsub("%+"," "):gsub("%%00",""))
+	--path=decode.unescape(path:gsub("%+"," "):gsub("%%00",""))
 	path=path:gsub("%.+%s*/","")
 	return path,params
 end
