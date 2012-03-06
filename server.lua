@@ -46,19 +46,19 @@ bytecachetimeout=24*60*60
 local sockettimeout=5*60
 rewriterules={}
 --rewrite rule example
---table.insert(rewriterules,function(req)
---		local year,month,day,id=req.path:match("^/(%d%d%d%d)/(%d%d)/(%d%d)/([%w%-_]+)")
---		if year then
---			id=id:gsub("%-","_")
---			req.path="/article.lua"
---			req.get.year=year
---			req.get.month=month
---			req.get.day=day
---			req.get.id=id
---			return true
---		end
---		return false
---	end)
+table.insert(rewriterules,function(req)
+		local year,month,day,id=req.path:match("^/(%d%d%d%d)/(%d%d)/(%d%d)/([%w%-_]+)")
+		if year then
+			id=id:gsub("%-","_")
+			req.path="/article.lua"
+			req.get.year=year
+			req.get.month=month
+			req.get.day=day
+			req.get.id=id
+			return true
+		end
+		return false
+	end)
 --config
 
 
@@ -166,6 +166,30 @@ local function resumeThread(client)
 end
 
 
+
+function seedRandom()
+	local function bytes_to_int(b1, b2, b3, b4)
+		local n = b1 + b2*256 + b3*65536 + b4*16777216
+		return n
+	end
+
+	local f=io.open("/dev/urandom","r")
+	local t
+
+	if f then
+		t=bytes_to_int(f:read(4):byte(1,4))
+	else
+		t=os.time()
+	end
+
+	--t=2147483648
+	t=(t > 2147483647) and (t - 4294967296) or t
+	print(t)
+	math.randomseed(t)
+
+	--print(math.random(3)-1,math.random(3)-1,math.random(3)-1,math.random(3)-1)
+end
+
 local function mainLoop()
 	local sock = socket.bind("*", httpport)
 	local ssock = socket.bind("*", httpsport)
@@ -190,7 +214,7 @@ local function mainLoop()
 	local timeoutcountlimit=sessiontimeout/5
 	local timeoutdiff=sockettimeout/5
 
-	math.randomseed(os.time())
+	seedRandom()	
 	collectgarbage("setpause",500)
 
 	--profiler.start()

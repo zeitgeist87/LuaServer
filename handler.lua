@@ -166,9 +166,11 @@ local function include(path,attr,request,response,rootdir)
 		input="return function(req,res,include,root)\n" .. start .. input .. "]===])\nend"
 		
 		--compile time concat
+		--input=input:gsub("send%(\"([^\"\\]*)\")","send([===[%1]===])") too dangerous
 		input=input:gsub("%]===%]%s*,%s*%[===%[","")
-		input=input:gsub("\"%s*,%s*\"","")
-		input=input:gsub("\'%s*,%s*\'","")
+		--in present form not save (concats everything not only send)
+		--input=input:gsub("\"%s*,%s*\"","")
+		--input=input:gsub("\'%s*,%s*\'","")
 		input=input:gsub("%]===%]%s*,%s*\"([^\"]*)\"","%1]===]")
 		--again rule 1
 		input=input:gsub("%]===%]%s*,%s*%[===%[","")

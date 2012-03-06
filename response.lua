@@ -38,6 +38,8 @@ end
 
 function Response:redirect(location)
 	self.headers.LOCATION=location
+	self.headers.TRANSFER_ENCODING=nil
+	self.headers.CONTENT_LENGTH=0
 	self.status=302
 	self.statusmsg="Found"
 	self:sendHeaders()
@@ -79,11 +81,10 @@ function Response:flush(lastchunk)
 		buffer[bsize]="\r\n0\r\n\r\n"
 		if self.len<=0 then
 			chunked=false
-			self.len=7
 		end
 	end
 
-	if self.len>0 then
+	if bsize>0 then
 		if chunked then
 			local pattern = "%X"
 			insert(buffer,self.headersindex,"\r\n")
@@ -107,6 +108,7 @@ function Response:flush(lastchunk)
 		--initialize buffer with 4 opcode NEWTABLE 0 4 0 instead of NEWTABLE 0 0 0
 		self.buffer={nil,nil,nil,nil}
 		self.len=0
+
 
 		while true do
 			local i, status, p = client:send(data,pos+1)

@@ -159,13 +159,22 @@ function Request.htmlspecialchars(s)
 end
 
 
-math.randomseed(os.time())
+--seeded in server.lua
+--math.randomseed(os.time())
+--math.randomseed(socket.gettime() * 1e6)
+local idcount=0
 
 local function uniqueId()
+	idcount=idcount+1
+	if idcount>1000 then
+		idcount=0
+		seedRandom()
+	end
+
 	--TODO revert local alias for luajit?
 	local random = math.random
-	local buffer = {random(255),random(255),random(255),random(255),random(255),random(255),random(255),random(255),
-	random(255),random(255),random(255),random(255),random(255),random(255),random(255),random(255)}
+	local buffer = {random(65536)-1,random(65536)-1,random(65536)-1,random(65536)-1,
+	random(65536)-1,random(65536)-1,random(65536)-1,random(65536)-1}
 
 	return table.concat(buffer)
 end
