@@ -14,38 +14,30 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with this program. If not, see <http://www.gnu.org/licenses/>.
 
--- global vars
--- debug = nil
-os.setlocale("C", "numeric");
-os.setlocale("C", "time");
-os.setlocale("C", "collate");
-timestamp = os.time()
--- global vars
+-------------------------------------------------------------------------------
+-- Implements the HTTPS protocol by simply starting a TLS connection and using
+-- the Http protocol to handle the rest. For this to work, httpsparams
+-- in config.lua must be properly set.
+-- 
+-- @module Https
 
 local config = require "config"
-local db = require "common.db"
-local aio = require "common.aio"
+local http = require "protocol.http.http"
+local Connection = require "common.connection"
 local log = require "common.log"
 
-aio.addIdleCallback(db.syncIfChanged)
-aio.addIdleCallback(log.flush)
+local Https = {}
 
-log.info("Starting Server...")
+function Https.handleConnection(socket)
+	local con = Connection.new(socket)
+	local succ, errmsg = con:startTLS()
 
-local http, smtp, https
-if config.protocol.http then
-	http = require "protocol.http.http"
-	aio.addIdleCallback(http.cleanup)
-	aio.createServer(config.httpport, http.handleConnection)
-end
-
-if config.protocol.https then
-	https = require "protocol.https.https"
-	if not http then
-		aio.addIdleCallback(http.cleanup)
+	if succ then
+		http.handleConnection(con)
+	else
+		log.error(errmsg)
+		socket:close()
 	end
-	aio.createServer(config.httpsport, https.handleConnection)
 end
 
-aio.startEventLoop()
-
+return Https

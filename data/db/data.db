@@ -1,0 +1,67 @@
+local v0={
+	welcomeMessage = {
+		title = "It works!",
+		subtitle = "You have successfully installed LuaServer.",
+		text = [[LuaServer is a small self contained webserver written entirely
+			in Lua. It supports fast dynamically generated pages, which can be
+			scripted in Lua. It has only a few dependencies and is ideal for
+			embedded devices like routers running
+			<a href="https://openwrt.org/">OpenWRT</a>. It uses
+			<a href="http://www.lua.org/pil/9.html">Lua coroutines</a>
+			to handle multiple connections at once and runs on
+			<a href="http://www.lua.org/download.html">Lua5.1</a>,
+			<a href="http://www.lua.org/download.html">Lua5.2</a> and
+			<a href="http://luajit.org/">LuaJIT</a>.]],
+	},
+	dependencies = {
+		{name = "LuaSocket", url = "http://w3.impa.br/~diego/software/luasocket/"},
+		{name = "LuaSec", url = "https://github.com/brunoos/luasec"},
+		{name = "LuaFilesystem", url = "https://github.com/keplerproject/luafilesystem"},
+	},
+	
+	articles = {
+		{
+			title = "Article 1",
+			text = [[Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+					sed do eiusmod tempor incididunt ut labore et dolore magna
+					aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+					ullamco laboris nisi ut aliquip ex ea commodo consequat.
+					Duis aute irure dolor in reprehenderit in voluptate velit
+					esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+					occaecat cupidatat non proident, sunt in culpa qui officia
+					deserunt mollit anim id est laborum.
+					<br/> <br/>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+					sed do eiusmod tempor incididunt ut labore et dolore magna
+					aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+					ullamco laboris nisi ut aliquip ex ea commodo consequat.
+					Duis aute irure dolor in reprehenderit in voluptate velit
+					esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+					occaecat cupidatat non proident, sunt in culpa qui officia
+					deserunt mollit anim id est laborum.]],
+			date = 1000000000,
+		},
+		{
+			title = "Article 2",
+			text = [[Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+					sed do eiusmod tempor incididunt ut labore et dolore magna
+					aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+					ullamco laboris nisi ut aliquip ex ea commodo consequat.
+					Duis aute irure dolor in reprehenderit in voluptate velit
+					esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+					occaecat cupidatat non proident, sunt in culpa qui officia
+					deserunt mollit anim id est laborum.
+					<br/> <br/>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+					sed do eiusmod tempor incididunt ut labore et dolore magna
+					aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+					ullamco laboris nisi ut aliquip ex ea commodo consequat.
+					Duis aute irure dolor in reprehenderit in voluptate velit
+					esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+					occaecat cupidatat non proident, sunt in culpa qui officia
+					deserunt mollit anim id est laborum.]],
+			date = 1000900000,
+		},
+	},
+}
+return v0
