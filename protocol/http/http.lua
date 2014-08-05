@@ -258,11 +258,17 @@ local function handleRequest(req, res)
 		-- file found
 		-- res.headers.DATE=printHttpDate(timestamp)
 
-		local ext = path:match("%.([%a%.]+)$")
+		local ext = path:match("%.([%a]+)$")
 		local gzext
-		if ext then
-			gzext = ext:match("%.(gz)$")
+
+		if ext == "gz" then
+			gzext = path:match("%.([%a]+)%.gz$")
+			if gzext then
+				ext = gzext
+				gzext = "gz"
+			end
 		end
+
 		if ext == "lua" then
 			local errmsg = dynscript.loadScript(path, req, res, attr)
 			if errmsg then
